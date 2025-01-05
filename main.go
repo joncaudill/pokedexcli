@@ -49,7 +49,7 @@ func commandExit() error {
 func commandMap() error {
 	baseUrl := ""
 	if curIndexUrls.nextUrl == nil && curIndexUrls.prevUrl == nil {
-		baseUrl = "https://pokeapi.co/api/v2/location/"
+		baseUrl = "https://pokeapi.co/api/v2/location-area/"
 	}
 
 	if curIndexUrls.nextUrl == nil && curIndexUrls.prevUrl != nil {
@@ -100,7 +100,7 @@ func commandMap() error {
 func commandMapb() error {
 	baseUrl := ""
 	if curIndexUrls.nextUrl == nil && curIndexUrls.prevUrl == nil {
-		baseUrl = "https://pokeapi.co/api/v2/location/"
+		baseUrl = "https://pokeapi.co/api/v2/location-area/"
 	}
 
 	if curIndexUrls.prevUrl == nil && curIndexUrls.nextUrl != nil {
