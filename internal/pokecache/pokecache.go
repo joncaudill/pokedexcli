@@ -47,16 +47,16 @@ func (c *Cache) reapLoop(interval time.Duration) {
 	ticker := time.NewTicker(interval)
 	go func() {
 		for range ticker.C {
-			c.reap()
+			c.reap(interval)
 		}
 	}()
 }
 
-func (c *Cache) reap() {
+func (c *Cache) reap(interval time.Duration) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	for key, entry := range c.entry {
-		if time.Since(entry.createdAt) > time.Minute {
+		if time.Since(entry.createdAt) > interval {
 			delete(c.entry, key)
 		}
 	}
