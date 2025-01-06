@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"time"
 )
 
 type cliCommand struct {
@@ -176,7 +177,7 @@ func commandHelp() error {
 
 func main() {
 	curIndexUrls = config{}
-	cache = pokecache.NewCache(5000)
+	cache = pokecache.NewCache(5 * time.Minute)
 
 	validCommands = map[string]cliCommand{
 		"exit": {
