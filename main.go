@@ -4,6 +4,8 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
+	"internal/pokecache"
+	"io"
 	"net/http"
 	"os"
 	"strings"
@@ -33,6 +35,7 @@ type config struct {
 // need to have closure on this variable since it is used later, but not defined yet
 var validCommands map[string]cliCommand
 var curIndexUrls config
+var cache *pokecache.Cache
 
 func cleanInput(text string) []string {
 	text = strings.ToLower(text)
@@ -61,26 +64,32 @@ func commandMap() error {
 		baseUrl = *curIndexUrls.nextUrl
 	}
 
-	//create request
-	req, err := http.NewRequest("GET", baseUrl, nil)
-	if err != nil {
-		return err
+	cacheget, hit := cache.Get(baseUrl)
+	if !hit {
+		//create request
+		req, err := http.NewRequest("GET", baseUrl, nil)
+		if err != nil {
+			return err
+		}
+		//create header
+
+		//make client and send request
+		client := &http.Client{}
+		res, err := client.Do(req)
+
+		if err != nil {
+			return err
+		}
+		defer res.Body.Close()
+
+		data, _ := io.ReadAll(res.Body)
+		cache.Add(baseUrl, data)
+		cacheget = data
 	}
-	//create header
-
-	//make client and send request
-	client := &http.Client{}
-	res, err := client.Do(req)
-
-	if err != nil {
-		return err
-	}
-	defer res.Body.Close()
-
 	//parse response
 	var pokedexAreas pokeAreas
-	decoder := json.NewDecoder(res.Body)
-	err = decoder.Decode(&pokedexAreas)
+	//decoder := json.NewDecoder(data)
+	err := json.Unmarshal(cacheget, &pokedexAreas)
 	if err != nil {
 		return err
 	}
@@ -112,26 +121,32 @@ func commandMapb() error {
 		baseUrl = *curIndexUrls.prevUrl
 	}
 
-	//create request
-	req, err := http.NewRequest("GET", baseUrl, nil)
-	if err != nil {
-		return err
+	cacheget, hit := cache.Get(baseUrl)
+	if !hit {
+		//create request
+		req, err := http.NewRequest("GET", baseUrl, nil)
+		if err != nil {
+			return err
+		}
+		//create header
+
+		//make client and send request
+		client := &http.Client{}
+		res, err := client.Do(req)
+
+		if err != nil {
+			return err
+		}
+		defer res.Body.Close()
+
+		data, _ := io.ReadAll(res.Body)
+		cache.Add(baseUrl, data)
+		cacheget = data
 	}
-	//create header
-
-	//make client and send request
-	client := &http.Client{}
-	res, err := client.Do(req)
-
-	if err != nil {
-		return err
-	}
-	defer res.Body.Close()
-
 	//parse response
 	var pokedexAreas pokeAreas
-	decoder := json.NewDecoder(res.Body)
-	err = decoder.Decode(&pokedexAreas)
+	//decoder := json.NewDecoder(data)
+	err := json.Unmarshal(cacheget, &pokedexAreas)
 	if err != nil {
 		return err
 	}
@@ -161,6 +176,7 @@ func commandHelp() error {
 
 func main() {
 	curIndexUrls = config{}
+	cache = pokecache.NewCache(5000)
 
 	validCommands = map[string]cliCommand{
 		"exit": {
