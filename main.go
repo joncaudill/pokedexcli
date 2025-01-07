@@ -630,6 +630,61 @@ func commandHelp(params ...string) error {
 	return nil
 }
 
+func commandInspect(params ...string) error {
+	if strings.Join(params, "") == "" {
+		return fmt.Errorf("inspect command requires a pokemon id or name")
+	}
+
+	if len(params) > 1 {
+		return fmt.Errorf("inspect command only takes one parameter")
+	}
+
+	if _, exists := myPokemon[params[0]]; !exists {
+		return fmt.Errorf("you have not caught that pokemon")
+	}
+
+	hp := 0
+	attack := 0
+	defense := 0
+	specialAttack := 0
+	specialDefense := 0
+	speed := 0
+
+	for _, val := range myPokemon[params[0]].Stats {
+		switch val.Stat.Name {
+		case "hp":
+			hp = val.BaseStat
+		case "attack":
+			attack = val.BaseStat
+		case "defense":
+			defense = val.BaseStat
+		case "special-attack":
+			specialAttack = val.BaseStat
+		case "special-defense":
+			specialDefense = val.BaseStat
+		case "speed":
+			speed = val.BaseStat
+		}
+	}
+	inspectedPokemon := myPokemon[params[0]]
+	fmt.Printf("Name: %s\n", inspectedPokemon.Name)
+	fmt.Printf("Height: %d\n", inspectedPokemon.Height)
+	fmt.Printf("Weight: %d\n", inspectedPokemon.Weight)
+	fmt.Println("Stats:")
+	fmt.Printf("\t-hp: %d\n", hp)
+	fmt.Printf("\t-attack: %d\n", attack)
+	fmt.Printf("\t-defense: %d\n", defense)
+	fmt.Printf("\t-special-attack: %d\n", specialAttack)
+	fmt.Printf("\t-special-defense: %d\n", specialDefense)
+	fmt.Printf("\t-speed: %d\n", speed)
+	fmt.Println("Types:")
+	for _, val := range inspectedPokemon.Types {
+		fmt.Printf("\t-%s\n", val.Type.Name)
+	}
+
+	return nil
+}
+
 func main() {
 	curIndexUrls = config{}
 	myPokemon = map[string]pokePokemon{}
@@ -665,6 +720,11 @@ func main() {
 			name:        "catch <pokemon id or name>",
 			description: "Attempts to catch a pokemon",
 			callback:    commandCatch,
+		},
+		"inspect": {
+			name:        "inspect <pokemon id or name>",
+			description: "Displays the stats of a caught pokemon",
+			callback:    commandInspect,
 		},
 	}
 	scanner := bufio.NewScanner(os.Stdin)
