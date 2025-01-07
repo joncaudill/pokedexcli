@@ -685,6 +685,20 @@ func commandInspect(params ...string) error {
 	return nil
 }
 
+func commandPokedex(params ...string) error {
+	if strings.Join(params, "") != "" {
+		return fmt.Errorf("pokedex command does not take any parameters")
+	}
+	fmt.Println()
+	fmt.Println("Your Pokedex:")
+	for idx := range myPokemon {
+		fmt.Printf(" - %v\n", idx)
+	}
+	fmt.Println()
+
+	return nil
+}
+
 func main() {
 	curIndexUrls = config{}
 	myPokemon = map[string]pokePokemon{}
@@ -725,6 +739,11 @@ func main() {
 			name:        "inspect <pokemon id or name>",
 			description: "Displays the stats of a caught pokemon",
 			callback:    commandInspect,
+		},
+		"pokedex": {
+			name:        "pokedex",
+			description: "Displays all caught pokemon",
+			callback:    commandPokedex,
 		},
 	}
 	scanner := bufio.NewScanner(os.Stdin)
